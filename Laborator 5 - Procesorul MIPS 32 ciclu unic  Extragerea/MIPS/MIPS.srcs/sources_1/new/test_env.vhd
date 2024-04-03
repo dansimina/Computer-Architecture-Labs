@@ -2,7 +2,7 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 03/20/2024 12:03:23 AM
+-- Create Date: 03/13/2024 10:34:18 AM
 -- Design Name: 
 -- Module Name: test_env - Behavioral
 -- Project Name: 
@@ -38,7 +38,9 @@ entity test_env is
            sw : in STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
            an : out STD_LOGIC_VECTOR (7 downto 0);
-           cat : out STD_LOGIC_VECTOR (6 downto 0));
+           cat : out STD_LOGIC_VECTOR (6 downto 0)
+--           outt : out STD_LOGIC_VECTOR (31 downto 0)
+           );
 end test_env;
 
 architecture Behavioral of test_env is
@@ -56,36 +58,31 @@ component SSD is
            cat : out STD_LOGIC_VECTOR (6 downto 0));
 end component;
 
-component RAM is
-    Port ( CLK : in STD_LOGIC;
-           EN : in STD_LOGIC;
-           WE : in STD_LOGIC;
-           ADDRESS : in STD_LOGIC_VECTOR (5 downto 0);
-           DI : in STD_LOGIC_VECTOR (31 downto 0);
-           DO : out STD_LOGIC_VECTOR (31 downto 0));
+component IFetch is
+    Port ( clk : in STD_LOGIC;
+           reset : in STD_LOGIC;
+           Jump : in STD_LOGIC;
+           PCSrc : in STD_LOGIC;
+           Jump_Address : in STD_LOGIC_VECTOR(31 downto 0);
+           Branch_Address : in STD_LOGIC_VECTOR(31 downto 0);
+           PC_4 : out STD_LOGIC_VECTOR(31 downto 0);
+           Instruction : out STD_LOGIC_VECTOR(31 downto 0)
+           );
 end component;
 
-signal counter: std_logic_vector (5 downto 0) := "000000";
-signal en0, en1: std_logic := '0';
-signal digits: std_logic_vector (31 downto 0) := x"00000000";
+signal enable: std_logic := '0';
+signal cnt: std_logic_vector (5 downto 0) := (others => '0');
+signal digits: std_logic_vector (31 downto 0) := (others => '0');
+signal pc: std_logic_vector (31 downto 0) := (others => '0');
+signal instr: std_logic_vector (31 downto 0) := (others => '0');
 
 begin
 
-connectMPG0: MPG port map(en0, btn(0), clk);
-connectMPG1: MPG port map(en1, btn(1), clk);
+    -- register file in fisier separat
+    connectMPG: MPG port map(enable, btn(0), clk);
 
-process(clk, btn(2)) 
-begin
-    if btn(2) = '1' then
-        counter <= "000000";
-    elsif rising_edge(clk) and en0 = '1' then
-        counter <= counter + 1;
-    end if;
-end process;
-
-connectRAM: RAM port map(clk, '1', en1, counter, digits, digits);
-digits <= digits(29 downto 0) & "00";
-
-connectSSD: SSD port map(clk, digits, an, cat);
+    connectIFetch: IFetch port map(enable, btn(1), sw(0), sw(1), x"0000000F", x"00000014", pc, instr);
+    digits <= instr when sw(7) = '0' else pc;
+    connectSSD: SSD port map(clk, digits, an, cat);
 
 end Behavioral;

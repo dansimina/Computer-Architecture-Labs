@@ -46,7 +46,9 @@ end REG_FILE;
 architecture Behavioral of REG_FILE is
 
 type memory is array (0 to 31) of std_logic_vector (31 downto 0);
-signal MEM: memory := (others => x"00000000");
+signal MEM: memory := ( x"00000001",
+                        x"00000001",
+                        others => x"00000000");
 
 begin
     
