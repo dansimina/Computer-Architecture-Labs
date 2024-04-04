@@ -62,8 +62,7 @@ begin
     begin
         if reset = '1' then 
             PC <= x"00000000";
-        end if;
-        if rising_edge (clk) then 
+        elsif rising_edge (clk) then 
             PC <= MUX2;
         end if;
     end process;
