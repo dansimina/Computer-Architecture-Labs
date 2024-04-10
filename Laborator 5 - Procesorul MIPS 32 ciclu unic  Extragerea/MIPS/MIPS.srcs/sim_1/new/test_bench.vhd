@@ -72,15 +72,8 @@ begin
 end process;
 process
 begin
-    
-    wait for perioada * 2;
-    sw_test(0) <= '1';
     wait for perioada;
-    sw_test(0) <= '0';
-    wait for perioada * 2;
-    sw_test(1) <= '1';
-    wait for perioada;
-    sw_test(1) <= '0';
+    sw_test(7 downto 5) <= "010";
     wait;
 end process;
 

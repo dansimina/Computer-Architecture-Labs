@@ -87,10 +87,13 @@ set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
+  {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/ID.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/IFetch.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/MPG.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/ROM.vhd}
+  {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/RegisterFile.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/SSD.vhd}
+  {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/UC.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/test_env.vhd}
 }
 OPTRACE "Adding files" END { }

@@ -60,7 +60,6 @@ port ( clk : in std_logic;
 end component;
 
 signal MUX: STD_LOGIC_VECTOR(4 downto 0) := "00000";
-signal EXT: STD_LOGIC_VECTOR(15 downto 0) := x"0000";
 
 begin
 
@@ -68,8 +67,8 @@ begin
 
     connectRegisterFile: RegisterFile port map(clk, Instr(25 downto 21), Instr(20 downto 16), MUX, WD, RegWrite, RD1, RD2);
     
-    EXT <= x"FFFF" * ("0" & Instr(15));
-    Ext_Imm <= EXT & Instr(15 downto 0);
+    Ext_Imm(15 downto 0) <= Instr(15 downto 0);  
+    Ext_Imm(31 downto 16) <= (others => Instr(15)) when ExtOp = '1' else (others => '0'); 
     func <= Instr(5 downto 0);
     sa <= Instr(10 downto 6);
     

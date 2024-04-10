@@ -84,12 +84,45 @@ component ID is
            sa : out STD_LOGIC_VECTOR (4 downto 0));
 end component;
 
+
+component UC is
+    Port ( Instr : in STD_LOGIC_VECTOR (5 downto 0);
+           RegDst : out STD_LOGIC;
+           ExtOp : out STD_LOGIC;
+           ALUSrc : out STD_LOGIC;
+           BranchOnEqual : out STD_LOGIC;
+           BranchOnGreaterThanZero : out STD_LOGIC;
+           BranchOnGreaterThanOrEqualToZero : out STD_LOGIC;
+           Jump : out STD_LOGIC;
+           ALUOp : out STD_LOGIC_VECTOR (5 downto 0);
+           MemWrite : out STD_LOGIC;
+           MemtoReg : out STD_LOGIC;
+           RegWrite : out STD_LOGIC);
+end component;
+
+component EX is
+    Port ( RD1 : in STD_LOGIC_VECTOR (31 downto 0);
+           ALUSrc : in STD_LOGIC;
+           RD2 : in STD_LOGIC_VECTOR (31 downto 0);
+           Ext_Imm : in STD_LOGIC_VECTOR (31 downto 0);
+           sa : in STD_LOGIC_VECTOR (4 downto 0);
+           func : in STD_LOGIC_VECTOR (5 downto 0);
+           ALUOp : in STD_LOGIC_VECTOR(5 downto 0);
+           PC_4 : in STD_LOGIC_VECTOR (31 downto 0);
+           Zero : out STD_LOGIC;
+           GreaterThanZero : out STD_LOGIC;
+           GreaterOrEqualToZero : out STD_LOGIC;
+           ALURes : out STD_LOGIC_VECTOR (31 downto 0);
+           Branch_Address : out STD_LOGIC_VECTOR (31 downto 0));
+end component;
+
+
 signal enable: std_logic := '0';
 signal digits: std_logic_vector (31 downto 0) := (others => '0');
 
 -- IFetch
 signal pc: std_logic_vector (31 downto 0) := (others => '0');
-signal Instr: std_logic_vector (31 downto 0) := (others => '0');
+--signal Instr: std_logic_vector (31 downto 0) := (others => '0');
 
 signal reset : STD_LOGIC :='0';
 signal Jump : STD_LOGIC :='0';
@@ -100,7 +133,6 @@ signal PC_4 : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 signal Instruction : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 
 --ID
-
 signal RegWrite : STD_LOGIC :='0';
 --signal Instr : STD_LOGIC_VECTOR (25 downto 0);
 signal RegDst : STD_LOGIC :='0';
@@ -112,22 +144,69 @@ signal Ext_Imm : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
 signal func : STD_LOGIC_VECTOR (5 downto 0):= (others => '0');
 signal sa : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
 
-begin
+--UC
+--signal Instr : STD_LOGIC_VECTOR (5 downto 0);
+--signal RegDst : STD_LOGIC;
+--signal ExtOp : STD_LOGIC;
+signal ALUSrc : STD_LOGIC := '0';
+signal BranchOnEqual : STD_LOGIC := '0';
+signal BranchOnGreaterThanZero : STD_LOGIC := '0';
+signal BranchOnGreaterThanOrEqualToZero : STD_LOGIC := '0';
+--signal Jump : STD_LOGIC;
+signal ALUOp : STD_LOGIC_VECTOR (5 downto 0) := "000000";
+signal MemWrite : STD_LOGIC := '0';
+signal MemtoReg : STD_LOGIC := '0';
+--signal RegWrite : STD_LOGIC);
 
+begin
+    -- test
+--    enable <= btn(0);
+    
     -- MPG
     connectMPG: MPG port map(enable, btn(0), clk);
 
     -- IFetch
     reset <= btn(1);
-    Jump <= sw(0);
-    PCSrc <= sw(1);
+--    Jump <= sw(0);
+--    PCSrc <= sw(1);
     connectIFetch: IFetch port map(enable, reset, Jump, PCSrc, Jump_Address, Branch_Address, PC_4, Instruction);
     
-    
-    -- ID e facut dar tb port map
-    connectID: ID port map(enable, RegWrite, Instruction, RegDst, WD, ExtOp, RD1, RD2, Ext_Imm, func, sa);
+    -- ID de testat pt testat RegWrite 0
+    connectID: ID port map(enable, '0', Instruction(25 downto 0), RegDst, WD, ExtOp, RD1, RD2, Ext_Imm, func, sa);
+   
+    -- UC de testat
+    connectUC: UC port map(Instruction(31 downto 26), RegDst, ExtOp, ALUSrc, BranchOnEqual, BranchOnGreaterThanZero, BranchOnGreaterThanOrEqualToZero, Jump, ALUOp, MemWrite, MemtoReg, RegWrite);   
+    led(0) <= RegDst;
+    led(1) <= ExtOp;
+    led(2) <= ALUSrc;
+    led(3) <= BranchOnEqual;
+    led(4) <= BranchOnGreaterThanZero;
+    led(5) <= BranchOnGreaterThanOrEqualToZero;
+    led(6) <= Jump;
+    led(12 downto 7) <= ALUOp;
+    led(13) <= MemWrite;
+    led(14) <= MemtoReg;
+    led(15) <= RegWrite;
         
-    digits <= Instruction when sw(7) = '0' else PC_4;
+    process(sw(7 downto 5), clk)
+    begin
+        case sw(7 downto 5) is 
+            when "000" => digits <= Instruction;
+            when "001" => digits <= PC_4;
+            when "010" => digits <= RD1;
+            when "011" => digits <= RD2;
+            when "100" => digits <= WD;
+            when "101" => digits <= x"000000" & "00" & func;
+            when "110" => digits <= x"000000" & "000" & sa;
+            when others => digits <= x"ffffffff";
+        end case;
+    end process;
+--    outt <= digits;
     connectSSD: SSD port map(clk, digits, an, cat);
-
+    
+--    de facut PCSrc
+--    Unitatea de execu?ie a instruc?iunilor (Instruction Execute -  EX); 
+--    Unitatea de Memorie (MEM); 
+--    Unitatea de scriere a rezultatului (Write-Back - WB); 
+--    Alte conexiuni necesare. 
 end Behavioral;
