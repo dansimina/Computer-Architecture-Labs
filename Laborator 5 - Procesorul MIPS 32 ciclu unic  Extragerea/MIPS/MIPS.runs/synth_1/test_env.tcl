@@ -70,8 +70,6 @@ proc create_report { reportName command } {
   }
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
-set_param chipscope.maxJobs 1
-set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a100tcsg324-1
 
@@ -87,6 +85,7 @@ set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
+  {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/EX.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/ID.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/IFetch.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/MPG.vhd}

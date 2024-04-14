@@ -38,8 +38,8 @@ entity test_env is
            sw : in STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
            an : out STD_LOGIC_VECTOR (7 downto 0);
-           cat : out STD_LOGIC_VECTOR (6 downto 0)
---           outt : out STD_LOGIC_VECTOR (31 downto 0)
+           cat : out STD_LOGIC_VECTOR (6 downto 0);
+           outt : out STD_LOGIC_VECTOR (31 downto 0)
            );
 end test_env;
 
@@ -116,14 +116,20 @@ component EX is
            Branch_Address : out STD_LOGIC_VECTOR (31 downto 0));
 end component;
 
+component MEM is
+    Port ( clk : in STD_LOGIC;
+           MemWrite : in STD_LOGIC;
+           ALUResIn : in STD_LOGIC_VECTOR (31 downto 0);
+           RD2 : in STD_LOGIC_VECTOR (31 downto 0);
+           MemData : out STD_LOGIC_VECTOR (31 downto 0);
+           ALUResOut : out STD_LOGIC_VECTOR (31 downto 0));
+end component;
 
 signal enable: std_logic := '0';
 signal digits: std_logic_vector (31 downto 0) := (others => '0');
 
 -- IFetch
 signal pc: std_logic_vector (31 downto 0) := (others => '0');
---signal Instr: std_logic_vector (31 downto 0) := (others => '0');
-
 signal reset : STD_LOGIC :='0';
 signal Jump : STD_LOGIC :='0';
 signal PCSrc : STD_LOGIC :='0';
@@ -134,7 +140,6 @@ signal Instruction : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 
 --ID
 signal RegWrite : STD_LOGIC :='0';
---signal Instr : STD_LOGIC_VECTOR (25 downto 0);
 signal RegDst : STD_LOGIC :='0';
 signal WD : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
 signal ExtOp : STD_LOGIC :='0';
@@ -145,36 +150,39 @@ signal func : STD_LOGIC_VECTOR (5 downto 0):= (others => '0');
 signal sa : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
 
 --UC
---signal Instr : STD_LOGIC_VECTOR (5 downto 0);
---signal RegDst : STD_LOGIC;
---signal ExtOp : STD_LOGIC;
 signal ALUSrc : STD_LOGIC := '0';
 signal BranchOnEqual : STD_LOGIC := '0';
 signal BranchOnGreaterThanZero : STD_LOGIC := '0';
 signal BranchOnGreaterThanOrEqualToZero : STD_LOGIC := '0';
---signal Jump : STD_LOGIC;
 signal ALUOp : STD_LOGIC_VECTOR (5 downto 0) := "000000";
 signal MemWrite : STD_LOGIC := '0';
 signal MemtoReg : STD_LOGIC := '0';
---signal RegWrite : STD_LOGIC);
+
+--EX
+signal Zero : STD_LOGIC := '0';
+signal GreaterThanZero : STD_LOGIC := '0';
+signal GreaterOrEqualToZero : STD_LOGIC := '0';
+signal ALURes : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+
+--MEM
+signal MemData : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal ALUResOut : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
 begin
     -- test
---    enable <= btn(0);
+    enable <= btn(0);
     
     -- MPG
-    connectMPG: MPG port map(enable, btn(0), clk);
+--    connectMPG: MPG port map(enable, btn(0), clk);
 
     -- IFetch
     reset <= btn(1);
---    Jump <= sw(0);
---    PCSrc <= sw(1);
     connectIFetch: IFetch port map(enable, reset, Jump, PCSrc, Jump_Address, Branch_Address, PC_4, Instruction);
     
     -- ID de testat pt testat RegWrite 0
-    connectID: ID port map(enable, '0', Instruction(25 downto 0), RegDst, WD, ExtOp, RD1, RD2, Ext_Imm, func, sa);
-   
-    -- UC de testat
+    connectID: ID port map(enable, RegWrite, Instruction(25 downto 0), RegDst, WD, ExtOp, RD1, RD2, Ext_Imm, func, sa);
+    
+    -- UC
     connectUC: UC port map(Instruction(31 downto 26), RegDst, ExtOp, ALUSrc, BranchOnEqual, BranchOnGreaterThanZero, BranchOnGreaterThanOrEqualToZero, Jump, ALUOp, MemWrite, MemtoReg, RegWrite);   
     led(0) <= RegDst;
     led(1) <= ExtOp;
@@ -187,6 +195,21 @@ begin
     led(13) <= MemWrite;
     led(14) <= MemtoReg;
     led(15) <= RegWrite;
+    
+    -- EX
+    connectEX: EX port map(RD1, ALUSrc, RD2, Ext_Imm, sa, func, ALUOp, PC_4, Zero, GreaterThanZero, GreaterOrEqualToZero, ALURes, Branch_Address);
+    
+    --MEM
+    connectMEM: MEM port map(enable, MemWrite, ALURes, RD2, MemData, ALUResOut);
+    
+    --WB
+    WD <= ALUResOut when MemtoReg = '0' else MemData;   
+    
+    --Calculul adresei de salt necondi?ionat Jump Address de la IFetch: 
+    Jump_Address <= PC_4(31 downto 26) & Instruction(25 downto 0);
+    
+    --Validarea saltului condi?ionat prin activarea PCSrc
+    PCSrc <= (BranchOnEqual and Zero) or (BranchOnGreaterThanZero and GreaterThanZero) or (BranchOnGreaterThanOrEqualToZero and GreaterOrEqualToZero);
         
     process(sw(7 downto 5), clk)
     begin
@@ -195,13 +218,14 @@ begin
             when "001" => digits <= PC_4;
             when "010" => digits <= RD1;
             when "011" => digits <= RD2;
-            when "100" => digits <= WD;
-            when "101" => digits <= x"000000" & "00" & func;
-            when "110" => digits <= x"000000" & "000" & sa;
+            when "100" => digits <= Ext_Imm;
+            when "101" => digits <= ALURes;
+            when "110" => digits <= MemData;
+            when "111" => digits <= WD;
             when others => digits <= x"ffffffff";
         end case;
     end process;
---    outt <= digits;
+    outt <= digits;
     connectSSD: SSD port map(clk, digits, an, cat);
     
 --    de facut PCSrc

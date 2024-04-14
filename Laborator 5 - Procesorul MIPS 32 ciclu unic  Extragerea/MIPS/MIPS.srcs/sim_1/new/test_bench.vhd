@@ -43,8 +43,8 @@ component test_env is
            sw : in STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
            an : out STD_LOGIC_VECTOR (7 downto 0);
-           cat : out STD_LOGIC_VECTOR (6 downto 0)
---           outt : out STD_LOGIC_VECTOR (31 downto 0)
+           cat : out STD_LOGIC_VECTOR (6 downto 0);
+           outt : out STD_LOGIC_VECTOR (31 downto 0)
            );
 end component;
 
@@ -59,7 +59,7 @@ constant perioada: TIME := 20ns;
 
 begin
 
-ust1: test_env port map (clk_test, btn_test, sw_test, led_test, an_test, cat_test);
+ust1: test_env port map (clk_test, btn_test, sw_test, led_test, an_test, cat_test, outt_test);
 
 process
 begin
@@ -73,7 +73,7 @@ end process;
 process
 begin
     wait for perioada;
-    sw_test(7 downto 5) <= "010";
+    sw_test(7 downto 5) <= "001";
     wait;
 end process;
 

@@ -52,13 +52,15 @@ end EX;
 
 architecture Behavioral of EX is
 SIGNAL MUX : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+SIGNAL OP: STD_LOGIC_VECTOR(5 downto 0) := (others => '0');
 begin
     
     MUX <= RD2 when ALUSrc = '0' else Ext_Imm;
-    process(RD1, MUX, ALUOp)
+    OP <= func when ALUOp = 0 else ALUOp;
+    process(RD1, MUX, OP)
     variable result: STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
     begin
-        case ALUOp is
+        case OP is
             --add
             when "100000" => result := RD1 + MUX;
             --sub
@@ -75,6 +77,8 @@ begin
             when "100110" => result := RD1 xor MUX;
             --sra
             when "000011" => result :=  to_stdlogicvector(to_bitvector(MUX) sra conv_integer(sa)); 
+               
+            when others => result := x"00000000";
         end case;
         
         if result = 0 then
@@ -83,13 +87,13 @@ begin
             Zero <= '0';
         end if;
         
-        if signed(result) > 0 then
+        if signed(RD1) > 0 then
             GreaterThanZero <= '1';
         else 
             GreaterThanZero <= '0';
         end if;
         
-        if signed(result) >= 0 then
+        if signed(RD1) >= 0 then
             GreaterOrEqualToZero <= '1';
         else 
             GreaterOrEqualToZero <= '0';
