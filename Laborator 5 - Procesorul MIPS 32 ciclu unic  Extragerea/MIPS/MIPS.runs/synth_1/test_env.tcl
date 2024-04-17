@@ -70,6 +70,8 @@ proc create_report { reportName command } {
   }
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 1
+set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a100tcsg324-1
 
@@ -88,7 +90,9 @@ read_vhdl -library xil_defaultlib {
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/EX.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/ID.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/IFetch.vhd}
+  {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/MEM.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/MPG.vhd}
+  {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/RAM.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/ROM.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/RegisterFile.vhd}
   {D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.srcs/sources_1/new/SSD.vhd}

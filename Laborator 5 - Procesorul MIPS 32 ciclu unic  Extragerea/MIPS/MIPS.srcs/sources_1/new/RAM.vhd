@@ -43,20 +43,23 @@ end RAM;
 architecture Behavioral of RAM is
 type ram_type is array (0 to 63) of std_logic_vector(31 downto 0); 
 signal ram : ram_type := ( 
- X"0000000A",
- X"00000019",
+-- X"0000000A", --10
+-- X"00000019", --25
+-- X"00000020", --32
+-- X"00000018", --24
+ X"00000014", --20
+ X"00000024", --36
  others => X"00000000"); 
  
 begin 
+
+ do <= ram(conv_integer(addr));
  
  process(clk) 
  begin 
  if rising_edge(clk) then 
     if we = '1' then 
      ram(conv_integer(addr)) <= di; 
-     do <= di; 
-    else 
-     do <= ram(conv_integer(addr)); 
     end if;  
   end if; 
  end process; 

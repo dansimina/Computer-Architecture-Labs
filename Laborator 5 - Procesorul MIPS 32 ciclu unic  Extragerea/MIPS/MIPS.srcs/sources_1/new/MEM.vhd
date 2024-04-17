@@ -38,7 +38,9 @@ entity MEM is
            ALUResIn : in STD_LOGIC_VECTOR (31 downto 0);
            RD2 : in STD_LOGIC_VECTOR (31 downto 0);
            MemData : out STD_LOGIC_VECTOR (31 downto 0);
-           ALUResOut : out STD_LOGIC_VECTOR (31 downto 0));
+           ALUResOut : out STD_LOGIC_VECTOR (31 downto 0);
+           view: in STD_LOGIC_VECTOR (5 downto 0);
+           test_en: in STD_LOGIC);
 end MEM;
 
 architecture Behavioral of MEM is
@@ -51,7 +53,7 @@ component RAM is
 end component;
 signal addr : STD_LOGIC_VECTOR (5 downto 0) := (others => '0');
 begin
-    addr <= "00" & ALUResIn(5 downto 2);
+    addr <= "00" & ALUResIn(5 downto 2) when test_en = '0' else view;
     connectRAM: RAM port map(clk, MemWrite, addr, RD2, MemData);
     ALUResOut <= ALUResIn;
 

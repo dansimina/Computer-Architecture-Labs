@@ -38,8 +38,8 @@ entity test_env is
            sw : in STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
            an : out STD_LOGIC_VECTOR (7 downto 0);
-           cat : out STD_LOGIC_VECTOR (6 downto 0);
-           outt : out STD_LOGIC_VECTOR (31 downto 0)
+           cat : out STD_LOGIC_VECTOR (6 downto 0)
+--           outt : out STD_LOGIC_VECTOR (31 downto 0)
            );
 end test_env;
 
@@ -122,7 +122,9 @@ component MEM is
            ALUResIn : in STD_LOGIC_VECTOR (31 downto 0);
            RD2 : in STD_LOGIC_VECTOR (31 downto 0);
            MemData : out STD_LOGIC_VECTOR (31 downto 0);
-           ALUResOut : out STD_LOGIC_VECTOR (31 downto 0));
+           ALUResOut : out STD_LOGIC_VECTOR (31 downto 0);
+           view: in STD_LOGIC_VECTOR (5 downto 0);
+           test_en: in STD_LOGIC);
 end component;
 
 signal enable: std_logic := '0';
@@ -170,10 +172,10 @@ signal ALUResOut : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
 begin
     -- test
-    enable <= btn(0);
+--    enable <= btn(0);
     
     -- MPG
---    connectMPG: MPG port map(enable, btn(0), clk);
+    connectMPG: MPG port map(enable, btn(0), clk);
 
     -- IFetch
     reset <= btn(1);
@@ -200,7 +202,7 @@ begin
     connectEX: EX port map(RD1, ALUSrc, RD2, Ext_Imm, sa, func, ALUOp, PC_4, Zero, GreaterThanZero, GreaterOrEqualToZero, ALURes, Branch_Address);
     
     --MEM
-    connectMEM: MEM port map(enable, MemWrite, ALURes, RD2, MemData, ALUResOut);
+    connectMEM: MEM port map(enable, MemWrite, ALURes, RD2, MemData, ALUResOut, sw(15 downto 10), sw(0));
     
     --WB
     WD <= ALUResOut when MemtoReg = '0' else MemData;   
@@ -225,7 +227,7 @@ begin
             when others => digits <= x"ffffffff";
         end case;
     end process;
-    outt <= digits;
+--    outt <= digits;
     connectSSD: SSD port map(clk, digits, an, cat);
     
 --    de facut PCSrc
