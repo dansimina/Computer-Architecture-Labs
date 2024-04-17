@@ -177,14 +177,14 @@ begin
     -- MPG
     connectMPG: MPG port map(enable, btn(0), clk);
 
-    -- IFetch
+    -- IFetch Instruction Fetch
     reset <= btn(1);
     connectIFetch: IFetch port map(enable, reset, Jump, PCSrc, Jump_Address, Branch_Address, PC_4, Instruction);
     
-    -- ID de testat pt testat RegWrite 0
+    -- ID Instruction Decode
     connectID: ID port map(enable, RegWrite, Instruction(25 downto 0), RegDst, WD, ExtOp, RD1, RD2, Ext_Imm, func, sa);
     
-    -- UC
+    -- UC Unitatea de Control
     connectUC: UC port map(Instruction(31 downto 26), RegDst, ExtOp, ALUSrc, BranchOnEqual, BranchOnGreaterThanZero, BranchOnGreaterThanOrEqualToZero, Jump, ALUOp, MemWrite, MemtoReg, RegWrite);   
     led(0) <= RegDst;
     led(1) <= ExtOp;
@@ -198,13 +198,13 @@ begin
     led(14) <= MemtoReg;
     led(15) <= RegWrite;
     
-    -- EX
+    -- EX Instruction Execute
     connectEX: EX port map(RD1, ALUSrc, RD2, Ext_Imm, sa, func, ALUOp, PC_4, Zero, GreaterThanZero, GreaterOrEqualToZero, ALURes, Branch_Address);
     
-    --MEM
+    --MEM Unitatea de Memorie
     connectMEM: MEM port map(enable, MemWrite, ALURes, RD2, MemData, ALUResOut, sw(15 downto 10), sw(0));
     
-    --WB
+    --WB Write-Back
     WD <= ALUResOut when MemtoReg = '0' else MemData;   
     
     --Calculul adresei de salt necondi?ionat Jump Address de la IFetch: 
@@ -230,9 +230,4 @@ begin
 --    outt <= digits;
     connectSSD: SSD port map(clk, digits, an, cat);
     
---    de facut PCSrc
---    Unitatea de execu?ie a instruc?iunilor (Instruction Execute -  EX); 
---    Unitatea de Memorie (MEM); 
---    Unitatea de scriere a rezultatului (Write-Back - WB); 
---    Alte conexiuni necesare. 
 end Behavioral;
