@@ -36,14 +36,17 @@ entity ID is
     Port ( clk : in STD_LOGIC;
            RegWrite : in STD_LOGIC;
            Instr : in STD_LOGIC_VECTOR (25 downto 0);
-           RegDst : in STD_LOGIC;
+--           RegDst : in STD_LOGIC;
            WD : in STD_LOGIC_VECTOR (31 downto 0);
            ExtOp : in STD_LOGIC;
            RD1 : out STD_LOGIC_VECTOR (31 downto 0);
            RD2 : out STD_LOGIC_VECTOR (31 downto 0);
            Ext_Imm : out STD_LOGIC_VECTOR (31 downto 0);
            func : out STD_LOGIC_VECTOR (5 downto 0);
-           sa : out STD_LOGIC_VECTOR (4 downto 0));
+           sa : out STD_LOGIC_VECTOR (4 downto 0);
+           WriteAddress : in STD_LOGIC_VECTOR (4 downto 0);
+           Addr_Target : out STD_LOGIC_VECTOR (4 downto 0);
+           Addr_Dest : out STD_LOGIC_VECTOR (4 downto 0));
 end ID;
 
 architecture Behavioral of ID is
@@ -59,13 +62,16 @@ port ( clk : in std_logic;
        rd2 : out std_logic_vector(31 downto 0)); 
 end component;
 
-signal MUX: STD_LOGIC_VECTOR(4 downto 0) := "00000";
+--signal MUX: STD_LOGIC_VECTOR(4 downto 0) := "00000";
 
 begin
 
-    MUX <= Instr(20 downto 16) when RegDst = '0' else Instr(15 downto 11);
+    --MUX <= Instr(20 downto 16) when RegDst = '0' else Instr(15 downto 11);
+    
+    Addr_Target <= Instr(20 downto 16);
+    Addr_Dest <= Instr(15 downto 11);
 
-    connectRegisterFile: RegisterFile port map(clk, Instr(25 downto 21), Instr(20 downto 16), MUX, WD, RegWrite, RD1, RD2);
+    connectRegisterFile: RegisterFile port map(clk, Instr(25 downto 21), Instr(20 downto 16), WriteAddress, WD, RegWrite, RD1, RD2);
     
     Ext_Imm(15 downto 0) <= Instr(15 downto 0);  
     Ext_Imm(31 downto 16) <= (others => Instr(15)) when ExtOp = '1' else (others => '0'); 

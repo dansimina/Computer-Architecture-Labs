@@ -74,14 +74,17 @@ component ID is
     Port ( clk : in STD_LOGIC;
            RegWrite : in STD_LOGIC;
            Instr : in STD_LOGIC_VECTOR (25 downto 0);
-           RegDst : in STD_LOGIC;
+--           RegDst : in STD_LOGIC;
            WD : in STD_LOGIC_VECTOR (31 downto 0);
            ExtOp : in STD_LOGIC;
            RD1 : out STD_LOGIC_VECTOR (31 downto 0);
            RD2 : out STD_LOGIC_VECTOR (31 downto 0);
            Ext_Imm : out STD_LOGIC_VECTOR (31 downto 0);
            func : out STD_LOGIC_VECTOR (5 downto 0);
-           sa : out STD_LOGIC_VECTOR (4 downto 0));
+           sa : out STD_LOGIC_VECTOR (4 downto 0);
+           WriteAddress : in STD_LOGIC_VECTOR (4 downto 0);
+           Addr_Target : out STD_LOGIC_VECTOR (4 downto 0);
+           Addr_Dest : out STD_LOGIC_VECTOR (4 downto 0));
 end component;
 
 
@@ -131,44 +134,75 @@ signal enable: std_logic := '0';
 signal digits: std_logic_vector (31 downto 0) := (others => '0');
 
 -- IFetch
-signal pc: std_logic_vector (31 downto 0) := (others => '0');
-signal reset : STD_LOGIC :='0';
-signal Jump : STD_LOGIC :='0';
-signal PCSrc : STD_LOGIC :='0';
-signal Jump_Address : STD_LOGIC_VECTOR(31 downto 0) := x"0000000F";
-signal Branch_Address : STD_LOGIC_VECTOR(31 downto 0) := x"00000014";
-signal PC_4 : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
-signal Instruction : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+signal reset_IF : STD_LOGIC :='0';
+signal Jump_IF : STD_LOGIC :='0';
+signal PCSrc_IF : STD_LOGIC :='0';
+signal Jump_Address_IF : STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
+signal Branch_Address_IF : STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
+signal PC_4_IF : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+signal Instruction_IF : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 
 --ID
-signal RegWrite : STD_LOGIC :='0';
-signal RegDst : STD_LOGIC :='0';
-signal WD : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
-signal ExtOp : STD_LOGIC :='0';
-signal RD1 : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
-signal RD2 : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
-signal Ext_Imm : STD_LOGIC_VECTOR (31 downto 0):= (others => '0');
-signal func : STD_LOGIC_VECTOR (5 downto 0):= (others => '0');
-signal sa : STD_LOGIC_VECTOR (4 downto 0):= (others => '0');
+signal RegWrite_ID : STD_LOGIC :='0';
+signal Instruction_ID : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+signal WD_ID : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal ExtOp_ID : STD_LOGIC :='0';
+signal RD1_ID : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal RD2_ID : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal Ext_Imm_ID : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal func_ID : STD_LOGIC_VECTOR (5 downto 0) := (others => '0');
+signal sa_ID : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal WriteAddress_ID : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal Addr_Target_ID : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal Addr_Dest_ID : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
 
 --UC
-signal ALUSrc : STD_LOGIC := '0';
-signal BranchOnEqual : STD_LOGIC := '0';
-signal BranchOnGreaterThanZero : STD_LOGIC := '0';
-signal BranchOnGreaterThanOrEqualToZero : STD_LOGIC := '0';
-signal ALUOp : STD_LOGIC_VECTOR (5 downto 0) := "000000";
-signal MemWrite : STD_LOGIC := '0';
-signal MemtoReg : STD_LOGIC := '0';
+signal Instruction_UC : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+signal RegDst_UC : STD_LOGIC := '0';
+signal ExtOp_UC : STD_LOGIC := '0';
+signal ALUSrc_UC : STD_LOGIC := '0';
+signal BranchOnEqual_UC : STD_LOGIC := '0';
+signal BranchOnGreaterThanZero_UC : STD_LOGIC := '0';
+signal BranchOnGreaterThanOrEqualToZero_UC : STD_LOGIC := '0';
+signal Jump_UC : STD_LOGIC := '0';
+signal ALUOp_UC : STD_LOGIC_VECTOR (5 downto 0) := "000000";
+signal MemWrite_UC : STD_LOGIC := '0';
+signal MemtoReg_UC : STD_LOGIC := '0';
+signal RegWrite_UC : STD_LOGIC := '0';
 
 --EX
-signal Zero : STD_LOGIC := '0';
-signal GreaterThanZero : STD_LOGIC := '0';
-signal GreaterOrEqualToZero : STD_LOGIC := '0';
-signal ALURes : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal RD1_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal ALUSrc_EX : STD_LOGIC := '0';
+signal RD2_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal Ext_Imm_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal sa_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal func_EX : STD_LOGIC_VECTOR (5 downto 0) := (others => '0');
+signal ALUOp_EX : STD_LOGIC_VECTOR (5 downto 0) := (others => '0');
+signal PC_4_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal Zero_EX : STD_LOGIC := '0';
+signal GreaterThanZero_EX : STD_LOGIC := '0';
+signal GreaterOrEqualToZero_EX : STD_LOGIC := '0';
+signal ALURes_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal Branch_Address_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
 --MEM
-signal MemData : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
-signal ALUResOut : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal MemWrite_MEM : STD_LOGIC := '0';
+signal ALUResIn_MEM : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal RD2_MEM : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal MemData_MEM : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+signal ALUResOut_MEM : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+
+--REGISTRE
+signal IF_ID : STD_LOGIC_VECTOR (63 downto 0) := (others => '0');
+signal ID_EX : STD_LOGIC_VECTOR (163 downto 0) := (others => '0');
+signal EX_MEM : STD_LOGIC_VECTOR (110 downto 0) := (others => '0');
+signal MEM_WB : STD_LOGIC_VECTOR (71 downto 0) := (others => '0');
+
+--MUX-ul dintre ID_EX si EX_MEM
+signal MUX_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+
+--WB
+signal WD : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
 begin
     -- test
@@ -178,51 +212,130 @@ begin
 --    connectMPG: MPG port map(enable, btn(0), clk);
 
     -- IFetch Instruction Fetch
-    reset <= btn(1);
-    connectIFetch: IFetch port map(enable, reset, Jump, PCSrc, Jump_Address, Branch_Address, PC_4, Instruction);
-    
+    reset_IF <= btn(1);
+    connectIFetch: IFetch port map(enable, reset_IF, Jump_IF, PCSrc_IF, Jump_Address_IF, Branch_Address_IF, PC_4_IF, Instruction_IF);
+         
     -- ID Instruction Decode
-    connectID: ID port map(enable, RegWrite, Instruction(25 downto 0), RegDst, WD, ExtOp, RD1, RD2, Ext_Imm, func, sa);
+    connectID: ID port map(enable, RegWrite_ID, Instruction_ID(25 downto 0), WD_ID, ExtOp_ID, RD1_ID, RD2_ID, Ext_Imm_ID, func_ID, sa_ID, WriteAddress_ID, Addr_Target_ID, Addr_Dest_ID);
     
     -- UC Unitatea de Control
-    connectUC: UC port map(Instruction(31 downto 26), RegDst, ExtOp, ALUSrc, BranchOnEqual, BranchOnGreaterThanZero, BranchOnGreaterThanOrEqualToZero, Jump, ALUOp, MemWrite, MemtoReg, RegWrite);   
-    led(0) <= RegDst;
-    led(1) <= ExtOp;
-    led(2) <= ALUSrc;
-    led(3) <= BranchOnEqual;
-    led(4) <= BranchOnGreaterThanZero;
-    led(5) <= BranchOnGreaterThanOrEqualToZero;
-    led(6) <= Jump;
-    led(12 downto 7) <= ALUOp;
-    led(13) <= MemWrite;
-    led(14) <= MemtoReg;
-    led(15) <= RegWrite;
-    
+    connectUC: UC port map(Instruction_UC(31 downto 26), RegDst_UC, ExtOp_UC, ALUSrc_UC, BranchOnEqual_UC, BranchOnGreaterThanZero_UC, BranchOnGreaterThanOrEqualToZero_UC, Jump_UC, ALUOp_UC, MemWrite_UC, MemtoReg_UC, RegWrite_UC);   
+    led(0) <= RegDst_UC;
+    led(1) <= ExtOp_UC;
+    led(2) <= ALUSrc_UC;
+    led(3) <= BranchOnEqual_UC;
+    led(4) <= BranchOnGreaterThanZero_UC;
+    led(5) <= BranchOnGreaterThanOrEqualToZero_UC;
+    led(6) <= Jump_UC;
+    led(12 downto 7) <= ALUOp_UC;
+    led(13) <= MemWrite_UC;
+    led(14) <= MemtoReg_UC;
+    led(15) <= RegWrite_UC;
+        
     -- EX Instruction Execute
-    connectEX: EX port map(RD1, ALUSrc, RD2, Ext_Imm, sa, func, ALUOp, PC_4, Zero, GreaterThanZero, GreaterOrEqualToZero, ALURes, Branch_Address);
-    
+    connectEX: EX port map(RD1_EX, ALUSrc_EX, RD2_EX, Ext_Imm_EX, sa_EX, func_EX, ALUOp_EX, PC_4_EX, Zero_EX, GreaterThanZero_EX, GreaterOrEqualToZero_EX, ALURes_EX, Branch_Address_EX);
+        
     --MEM Unitatea de Memorie
-    connectMEM: MEM port map(enable, MemWrite, ALURes, RD2, MemData, ALUResOut, sw(15 downto 10), sw(0));
+    connectMEM: MEM port map(enable, MemWrite_MEM, ALUResIn_MEM, RD2_MEM, MemData_MEM, ALUResOut_MEM, sw(15 downto 10), sw(0));
     
     --WB Write-Back
-    WD <= ALUResOut when MemtoReg = '0' else MemData;   
+    WD <= MEM_WB(65 downto 34) when MEM_WB(0) = '0' else MEM_WB(33 downto 2);   
+      
+    --REGISTRE
     
-    --Calculul adresei de salt necondi?ionat Jump Address de la IFetch: 
-    Jump_Address <= PC_4(31 downto 26) & Instruction(25 downto 0);
-    
-    --Validarea saltului condi?ionat prin activarea PCSrc
-    PCSrc <= (BranchOnEqual and Zero) or (BranchOnGreaterThanZero and GreaterThanZero) or (BranchOnGreaterThanOrEqualToZero and GreaterOrEqualToZero);
+    --Conectare iesiri
+    process(enable)
+    begin
+        if rising_edge(enable) then 
+        --IF_ID
+            IF_ID(31 downto 0) <= PC_4_IF;
+            IF_ID(63 downto 32) <= Instruction_IF;
+            
+        --ID_EX
+            ID_EX(0) <= MemtoReg_UC;
+            ID_EX(1) <= RegWrite_UC;
+            ID_EX(2) <= MemWrite_UC;
+            ID_EX(3) <= BranchOnEqual_UC;
+            ID_EX(4) <= BranchOnGreaterThanZero_UC;
+            ID_EX(5) <= BranchOnGreaterThanOrEqualToZero_UC;
+            ID_EX(11 downto 6) <= ALUOp_UC;
+            ID_EX(12) <= ALUSrc_UC;
+            ID_EX(13) <= RegDst_UC;
+            ID_EX(45 downto 14) <= IF_ID(31 downto 0);
+            ID_EX(77 downto 46) <= RD1_ID;
+            ID_EX(109 downto 78) <= RD2_ID;
+            ID_EX(114 downto 110) <= sa_ID;
+            ID_EX(146 downto 115) <= Ext_Imm_ID;
+            ID_EX(152 downto 147) <= func_ID;
+            ID_EX(157 downto 153) <= Addr_Target_ID;
+            ID_EX(162 downto 158) <= Addr_Dest_ID;
+            
+        --EX_MEM
+            EX_MEM(5 downto 0) <= ID_EX(5 downto 0);
+            EX_MEM(37 downto 6) <= Branch_Address_EX;
+            EX_MEM(38) <= Zero_EX;
+            EX_MEM(39) <= GreaterThanZero_EX;
+            EX_MEM(40) <= GreaterOrEqualToZero_EX;
+            EX_MEM(72 downto 41) <= ALURes_EX;
+            EX_MEM(104 downto 73) <= ID_EX(109 downto 78);
+            EX_MEM(109 downto 105) <= MUX_EX;
         
+        --MEM_WB
+            MEM_WB(1 downto 0) <= EX_MEM(1 downto 0);
+            MEM_WB(33 downto 2) <= MemData_MEM;
+            MEM_WB(65 downto 34) <= ALUResOut_MEM;
+            MEM_WB(70 downto 66) <= EX_MEM(109 downto 105);
+        end if;
+    end process;
+    
+    --Conectare Intrari
+    --IF
+        --Calculul adresei de salt necondi?ionat Jump Address de la IFetch: 
+        Jump_Address_IF <= IF_ID(31 downto 26) & IF_ID(57 downto 32);
+    
+        Branch_Address_IF <= EX_MEM(37 downto 6);
+        Jump_IF <= Jump_UC;
+    
+        --Validarea saltului condi?ionat prin activarea PCSrc
+        PCSrc_IF <= (EX_MEM(3) and EX_MEM(38)) or (EX_MEM(4) and EX_MEM(39)) or (EX_MEM(5) and EX_MEM(40));
+    
+    --UC
+        Instruction_UC <= IF_ID(63 downto 32);
+    
+    --ID
+        Instruction_ID <= IF_ID(63 downto 32);
+        RegWrite_ID <= MEM_WB(1);
+        ExtOp_ID <= ExtOp_UC;
+        WriteAddress_ID <= MEM_WB(70 downto 66);
+        WD_ID <= WD;
+        
+    --EX
+        MUX_EX <= ID_EX(157 downto 153) when ID_EX(13) = '0' else ID_EX(162 downto 158);
+        RD1_EX <= ID_EX(77 downto 46);
+        ALUSrc_EX <= ID_EX(12);
+        RD2_EX <= ID_EX(109 downto 78);
+        Ext_Imm_EX <= ID_EX(146 downto 115);
+        sa_EX <= ID_EX(114 downto 110);
+        func_EX <= ID_EX(152 downto 147);
+        ALUOp_EX <= ID_EX(11 downto 6);
+        PC_4_EX <= ID_EX(45 downto 14);
+        
+    --MEM
+        MemWrite_MEM <= EX_MEM(2);
+        ALUResIn_MEM <= EX_MEM(72 downto 41);
+        RD2_MEM <= EX_MEM(104 downto 73);
+        
+    --Afisare
     process(sw(7 downto 5), clk)
     begin
         case sw(7 downto 5) is 
-            when "000" => digits <= Instruction;
-            when "001" => digits <= PC_4;
-            when "010" => digits <= RD1;
-            when "011" => digits <= RD2;
-            when "100" => digits <= Ext_Imm;
-            when "101" => digits <= ALURes;
-            when "110" => digits <= MemData;
+            when "000" => digits <= IF_ID(63 downto 32); -- instruction
+            when "001" => digits <= IF_ID(31 downto 0); --pc + 4
+            when "010" => digits <= ID_EX(77 downto 46); -- RD1
+            when "011" => digits <= ID_EX(109 downto 78); --RD2
+            when "100" => digits <= ID_EX(146 downto 115); --Ext_Imm
+            when "101" => digits <= EX_MEM(72 downto 41); --ALURes
+            when "110" => digits <= MEM_WB(33 downto 2); --MemData
             when "111" => digits <= WD;
             when others => digits <= x"ffffffff";
         end case;
