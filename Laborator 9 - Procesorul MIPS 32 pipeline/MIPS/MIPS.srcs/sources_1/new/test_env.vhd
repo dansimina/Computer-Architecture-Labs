@@ -38,8 +38,8 @@ entity test_env is
            sw : in STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
            an : out STD_LOGIC_VECTOR (7 downto 0);
-           cat : out STD_LOGIC_VECTOR (6 downto 0);
-           outt : out STD_LOGIC_VECTOR (31 downto 0)
+           cat : out STD_LOGIC_VECTOR (6 downto 0)
+--           outt : out STD_LOGIC_VECTOR (31 downto 0)
            );
 end test_env;
 
@@ -206,10 +206,10 @@ signal WD : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
 begin
     -- test
-    enable <= btn(0);
+--    enable <= btn(0);
     
     -- MPG
---    connectMPG: MPG port map(enable, btn(0), clk);
+    connectMPG: MPG port map(enable, btn(0), clk);
 
     -- IFetch Instruction Fetch
     reset_IF <= btn(1);
@@ -340,7 +340,7 @@ begin
             when others => digits <= x"ffffffff";
         end case;
     end process;
-    outt <= digits;
+--    outt <= digits;
     connectSSD: SSD port map(clk, digits, an, cat);
     
 end Behavioral;
