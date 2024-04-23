@@ -24,7 +24,7 @@ else
 fi
 export LD_LIBRARY_PATH
 
-HD_PWD='D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 5 - Procesorul MIPS 32 ciclu unic  Extragerea/MIPS/MIPS.runs/synth_1'
+HD_PWD='D:/Documents/Facultate/AC/Computer-Architecture-Labs/Laborator 9 - Procesorul MIPS 32 pipeline/MIPS/MIPS.runs/synth_1'
 cd "$HD_PWD"
 
 HD_LOG=runme.log
