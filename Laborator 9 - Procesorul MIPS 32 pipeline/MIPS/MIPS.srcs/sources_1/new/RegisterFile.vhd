@@ -55,7 +55,7 @@ begin
  
  process(clk) 
  begin 
-  if rising_edge(clk) then 
+  if falling_edge(clk) then 
    if regwr = '1' then 
     reg_file(conv_integer(wa)) <= wd; 
    end if; 

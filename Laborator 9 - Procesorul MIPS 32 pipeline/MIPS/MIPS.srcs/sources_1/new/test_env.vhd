@@ -104,7 +104,7 @@ component UC is
 end component;
 
 component EX is
-    Port ( RD1 : in STD_LOGIC_VECTOR (31 downto 0);
+     Port ( RD1 : in STD_LOGIC_VECTOR (31 downto 0);
            ALUSrc : in STD_LOGIC;
            RD2 : in STD_LOGIC_VECTOR (31 downto 0);
            Ext_Imm : in STD_LOGIC_VECTOR (31 downto 0);
@@ -116,7 +116,12 @@ component EX is
            GreaterThanZero : out STD_LOGIC;
            GreaterOrEqualToZero : out STD_LOGIC;
            ALURes : out STD_LOGIC_VECTOR (31 downto 0);
-           Branch_Address : out STD_LOGIC_VECTOR (31 downto 0));
+           Branch_Address : out STD_LOGIC_VECTOR (31 downto 0);
+           RegDst : in STD_LOGIC;
+           Addr_Target : in STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+           Addr_Dest : in STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+           Addr_RegWrite : out STD_LOGIC_VECTOR (4 downto 0) := (others => '0')
+           );
 end component;
 
 component MEM is
@@ -185,6 +190,11 @@ signal GreaterOrEqualToZero_EX : STD_LOGIC := '0';
 signal ALURes_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 signal Branch_Address_EX : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
+signal RegDst_EX : STD_LOGIC := '0';
+signal Addr_Target_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal Addr_Dest_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+signal Addr_RegWrite_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+
 --MEM
 signal MemWrite_MEM : STD_LOGIC := '0';
 signal ALUResIn_MEM : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
@@ -199,7 +209,7 @@ signal EX_MEM : STD_LOGIC_VECTOR (110 downto 0) := (others => '0');
 signal MEM_WB : STD_LOGIC_VECTOR (71 downto 0) := (others => '0');
 
 --MUX-ul dintre ID_EX si EX_MEM
-signal MUX_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+--signal MUX_EX : STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
 
 --WB
 signal WD : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
@@ -233,7 +243,7 @@ begin
     led(15) <= RegWrite_UC;
         
     -- EX Instruction Execute
-    connectEX: EX port map(RD1_EX, ALUSrc_EX, RD2_EX, Ext_Imm_EX, sa_EX, func_EX, ALUOp_EX, PC_4_EX, Zero_EX, GreaterThanZero_EX, GreaterOrEqualToZero_EX, ALURes_EX, Branch_Address_EX);
+    connectEX: EX port map(RD1_EX, ALUSrc_EX, RD2_EX, Ext_Imm_EX, sa_EX, func_EX, ALUOp_EX, PC_4_EX, Zero_EX, GreaterThanZero_EX, GreaterOrEqualToZero_EX, ALURes_EX, Branch_Address_EX, RegDst_EX, Addr_Target_EX, Addr_Dest_EX, Addr_RegWrite_EX);
         
     --MEM Unitatea de Memorie
     connectMEM: MEM port map(enable, MemWrite_MEM, ALUResIn_MEM, RD2_MEM, MemData_MEM, ALUResOut_MEM, sw(15 downto 10), sw(0));
@@ -278,7 +288,7 @@ begin
             EX_MEM(40) <= GreaterOrEqualToZero_EX;
             EX_MEM(72 downto 41) <= ALURes_EX;
             EX_MEM(104 downto 73) <= ID_EX(109 downto 78);
-            EX_MEM(109 downto 105) <= MUX_EX;
+            EX_MEM(109 downto 105) <= Addr_RegWrite_EX;
         
         --MEM_WB
             MEM_WB(1 downto 0) <= EX_MEM(1 downto 0);
@@ -310,7 +320,7 @@ begin
         WD_ID <= WD;
         
     --EX
-        MUX_EX <= ID_EX(157 downto 153) when ID_EX(13) = '0' else ID_EX(162 downto 158);
+        --MUX_EX <= ID_EX(157 downto 153) when ID_EX(13) = '0' else ID_EX(162 downto 158);
         RD1_EX <= ID_EX(77 downto 46);
         ALUSrc_EX <= ID_EX(12);
         RD2_EX <= ID_EX(109 downto 78);
@@ -320,6 +330,10 @@ begin
         ALUOp_EX <= ID_EX(11 downto 6);
         PC_4_EX <= ID_EX(45 downto 14);
         
+        RegDst_EX <= ID_EX(13);
+        Addr_Target_EX <= ID_EX(157 downto 153);
+        Addr_Dest_EX <= ID_EX(162 downto 158);
+                
     --MEM
         MemWrite_MEM <= EX_MEM(2);
         ALUResIn_MEM <= EX_MEM(72 downto 41);
@@ -330,12 +344,12 @@ begin
     begin
         case sw(7 downto 5) is 
             when "000" => digits <= IF_ID(63 downto 32); -- instruction
-            when "001" => digits <= IF_ID(31 downto 0); --pc + 4
+            when "001" => digits <= PC_4_IF; --IF_ID(31 downto 0); --pc + 4
             when "010" => digits <= ID_EX(77 downto 46); -- RD1
             when "011" => digits <= ID_EX(109 downto 78); --RD2
             when "100" => digits <= ID_EX(146 downto 115); --Ext_Imm
-            when "101" => digits <= EX_MEM(72 downto 41); --ALURes
-            when "110" => digits <= MEM_WB(33 downto 2); --MemData
+            when "101" => digits <= ALURes_EX; --EX_MEM(72 downto 41); --ALURes
+            when "110" => digits <= MemData_MEM; --MEM_WB(33 downto 2); --MemData
             when "111" => digits <= WD;
             when others => digits <= x"ffffffff";
         end case;

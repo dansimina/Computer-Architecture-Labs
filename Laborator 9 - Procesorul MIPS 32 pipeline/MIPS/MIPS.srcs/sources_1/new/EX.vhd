@@ -47,14 +47,19 @@ entity EX is
            GreaterThanZero : out STD_LOGIC;
            GreaterOrEqualToZero : out STD_LOGIC;
            ALURes : out STD_LOGIC_VECTOR (31 downto 0);
-           Branch_Address : out STD_LOGIC_VECTOR (31 downto 0));
+           Branch_Address : out STD_LOGIC_VECTOR (31 downto 0);
+           RegDst : in STD_LOGIC;
+           Addr_Target : in STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+           Addr_Dest : in STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+           Addr_RegWrite : out STD_LOGIC_VECTOR (4 downto 0) := (others => '0')
+           );
 end EX;
 
 architecture Behavioral of EX is
 SIGNAL MUX : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 SIGNAL OP: STD_LOGIC_VECTOR(5 downto 0) := (others => '0');
 begin
-    
+    Addr_RegWrite <= Addr_Target when RegDst = '0' else Addr_Dest;
     MUX <= RD2 when ALUSrc = '0' else Ext_Imm;
     OP <= func when ALUOp = 0 else ALUOp;
     process(RD1, MUX, OP)
