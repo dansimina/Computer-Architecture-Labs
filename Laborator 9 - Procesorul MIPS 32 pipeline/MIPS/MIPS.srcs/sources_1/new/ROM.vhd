@@ -39,7 +39,7 @@ end ROM;
 
 architecture Behavioral of ROM is
 
-type memory is array (0 to 31) of std_logic_vector (31 downto 0);
+type memory is array (0 to 63) of std_logic_vector (31 downto 0);
 signal ROM: memory := ( B"000000_01010_01010_01010_00000_100110", -- 014A5026 00 xor $10, $10, $10      pun in registru valoarea 0
                         B"000000_00000_00000_00000_00000_100110", -- 00000026 01 xor $0, $0, $0         pun in registru valoarea 0
                         B"000000_11110_11110_11110_00000_100110", -- 03DEF026 02 xor $30, $30, $30      pun in registru valoarea 0

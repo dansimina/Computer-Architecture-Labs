@@ -156,7 +156,7 @@ begin
                          BranchOnGreaterThanZero <= '0';
                          BranchOnGreaterThanOrEqualToZero <= '0';
                          Jump <= '0';
-                         ALUOp <= "000000";
+                         ALUOp <= "111111";
                          MemWrite <= '0';
                          MemtoReg <= '0';
                          RegWrite <= '0';
