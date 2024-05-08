@@ -350,7 +350,7 @@ begin
             when "100" => digits <= ID_EX(146 downto 115); --Ext_Imm
             when "101" => digits <= ALURes_EX; --EX_MEM(72 downto 41); --ALURes
             when "110" => digits <= MemData_MEM; --MEM_WB(33 downto 2); --MemData
-            when "111" => digits <= WD;
+            when "111" => digits <= WD_ID;
             when others => digits <= x"ffffffff";
         end case;
     end process;
